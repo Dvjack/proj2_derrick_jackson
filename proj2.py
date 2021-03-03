@@ -5,54 +5,59 @@ import cv2
 
 x = 200
 y = 100
+# generating and diplaying the trial map
+def trial():
+    trial_map = np.zeros([y,x],np.uint8)
+    trial_map[y-1-60:y-40-1,90:110] = 255
+    # print(trial_map)
+    cv2.circle(trial_map,(160-1,y-50-1),15,(255,0,0),-1)
+    # print(trial_map[50][160])
+    # cv2.imshow('map', trial_map)
+    # cv2.waitKey(0)
 
-trial_map = np.zeros([y,x],np.uint8)
-trial_map[y-1-60:y-40-1,90:110] = 255
-# print(trial_map)
-cv2.circle(trial_map,(160-1,y-50-1),15,(255,0,0),-1)
-print(trial_map[50][160])
-cv2.imshow('map', trial_map)
-cv2.waitKey(0)
+trial()
 
-def find_blank_tile(array):
+def get_pos():
+    start_col = int(input("Starting Column: "))
+    start_row = int(input("Starting Row: "))
+    starting_position = [start_col,start_row]
+    goal_col = int(input("Goal Column: "))
+    goal_row = int(input("Goal Row: "))
+    goal_position = [goal_col,goal_row]
 
-        # grab index of where the value of the index of the state is 0
-        blank_tile = np.where(np.asarray(array) == 0)[0][0]
-       
-        # print(f'blank tile location is: {blank_tile}')
-        
-        return blank_tile
+    print(f'start: {starting_position}')
+    print(f'goal: {goal_position}')
 
-def Action_Move(zero_col, zero_row, parent_state, direction):
-        
-        next_pos = (zero_col + direction[0], zero_row + direction[1])
-        
-        # If the move is legal then swap the blank space with the next position
-        if next_pos[0] < size and next_pos[0] >= 0 and next_pos[1] < size and next_pos[1] >= 0:
+get_pos()
+
+
+def Action_Move(start_col, start_row, direction):
+
+    next_pos = (start_col + direction[0], start_row + direction[1])
+
+    if next_pos[0] < x and next_pos[0] >= 0 and next_pos[1] < y and next_pos[1] >= 0:
+
+        return
+    
+# try:
+#         goal_reached = False
+#         i =0
+#         while not goal_reached:
+
+
+#             goal_reached = Action_Move(blank_tile_col,blank_tile_row, parent_state, (0,-1))
+           
+#             goal_reached = Action_Move(blank_tile_col,blank_tile_row, parent_state, (0,1)) or goal_reached
             
-            next_pos_index = (next_pos[1] * size) + next_pos[0]
-            zero_loc = (zero_row * size) + zero_col
+#             goal_reached = Action_Move(blank_tile_col,blank_tile_row, parent_state, (-1,0)) or goal_reached
             
+#             goal_reached = Action_Move(blank_tile_col,blank_tile_row, parent_state, (1,0)) or goal_reached
 
-            curr_state = parent_state.copy()
-            
-            
-            temp = curr_state[zero_loc]
-            curr_state[zero_loc] = curr_state[next_pos_index]
-            curr_state[next_pos_index] = temp
-            
-            # If the current state isn't visited then append it to the visited list and add it to the queue     
-                   
-            if curr_state not in visited:
+#             goal_reached = Action_Move(blank_tile_col,blank_tile_row, parent_state, (-1,-1)) or goal_reached
 
-                visited.append(curr_state)
-                parent_visited.append(parent_state)
-               
-                parent_q.put_nowait(curr_state)
+#             goal_reached = Action_Move(blank_tile_col,blank_tile_row, parent_state, (1,-1)) or goal_reached
 
-                # Let us know when we are at the goal state and return true
-                if curr_state == goal_state:
-                    print("Goal has been reached")
-                    print(f'Puzzle is: {curr_state}')
-                    return True
-        return False 
+#             goal_reached = Action_Move(blank_tile_col,blank_tile_row, parent_state, (-1,1)) or goal_reached
+
+#             goal_reached = Action_Move(blank_tile_col,blank_tile_row, parent_state, (1,1)) or goal_reached
+
