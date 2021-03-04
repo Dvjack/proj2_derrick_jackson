@@ -21,6 +21,7 @@ def get_trial():
     return trial_map
 
 trial_map = get_trial()
+print(trial_map)
 
 def get_pos():
     start_col = int(input("Starting Column: "))
@@ -50,10 +51,15 @@ parent_q.put_nowait(start)
 def Action_Move(start_col, start_row, parent_pos, direction):
 
     next_pos = (start_col + direction[0], start_row + direction[1])
-    print()
+
+    
+
     if next_pos[1] < x and next_pos[1] >= 0 and next_pos[0] < y and next_pos[0] >= 0 and trial_map[next_pos[0], next_pos[1]] != obstacle and next_pos not in visited:
 
-        
+        trial_map[next_pos[0], next_pos[1]] = 150
+        cv2.imshow('bfs map', trial_map)
+        cv2.waitKey(0)
+
         visited.append(next_pos)
         parent_visited.append(parent_pos)
         parent_q.put_nowait(next_pos)
@@ -101,5 +107,20 @@ try:
 except KeyboardInterrupt:
     exit()
 
-                
-    
+my_path = []
+j = 0
+current_pos = tuple(goal)
+# print(f'Visited is: {visited}')
+# print(f'parent visited: {parent_visited}')
+while current_pos != 0:
+    # print(f'J is {j}')
+    winning_index = visited.index(current_pos)
+    # print(f'win:{winning_index}')
+    # print(parent_visited[winning_index])
+    my_path.append(current_pos)
+    current_pos = parent_visited[winning_index]
+
+    j += 1
+
+my_path.reverse()
+print(f'optimized: {my_path}')
