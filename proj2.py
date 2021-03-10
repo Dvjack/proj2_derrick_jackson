@@ -32,7 +32,7 @@ def get_trial():
     cv2.fillPoly(trial_map,weird_pts,255)
     cv2.circle(trial_map,(90,70),35,255,-1)
     cv2.ellipse(trial_map,(246,145), (60,30), 0, 0, 360, 255, -1)
-    cv2.rectangle(trial_map,(50,0),(100,299),255,-1)
+    # cv2.rectangle(trial_map,(50,0),(100,299),255,-1)
     trial_map = trial_map[:][::-1]
     # print(trial_map[50][160])
     # cv2.imshow('map', trial_map)
