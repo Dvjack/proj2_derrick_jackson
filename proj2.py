@@ -7,29 +7,48 @@ import os
 
 obstacle = np.uint8(255)
 
-x = 200
-y = 100
+x = 400
+y = 300
 # generating and diplaying the trial map
+# def get_trial():
+#     trial_map = np.zeros([y,x],np.uint8)
+#     trial_map[y-1-60:y-40-1,90:110] = 255
+#     # print(trial_map)
+#     cv2.circle(trial_map,(160-1,y-50-1),15,255,-1)
+#     # print(trial_map[50][160])
+#     # cv2.imshow('map', trial_map)
+#     # cv2.waitKey(0)
+#     return trial_map
+
 def get_trial():
     trial_map = np.zeros([y,x],np.uint8)
-    trial_map[y-1-60:y-40-1,90:110] = 255
+    # trial_map[y-1-60:y-40-1,90:110] = 255
     # print(trial_map)
-    cv2.circle(trial_map,(160-1,y-50-1),15,255,-1)
+    c_pts = np.array([[[200,230], [200,280], [230,280], [230,270], [210,270], [210, 240], [230, 240], [230,230]]], dtype=np.int32)
+    rect_pts = np.array([[[48,108],[37,124],[159,210],[171,194]]], dtype =np.int32 )
+    weird_pts = np.array([[[328,63],[289,106],[328,146],[354,138],[384,172],[384,117]]], dtype =np.int32 )
+    cv2.fillPoly(trial_map,c_pts,255)
+    cv2.fillPoly(trial_map,rect_pts,255)
+    cv2.fillPoly(trial_map,weird_pts,255)
+    cv2.circle(trial_map,(90,70),35,255,-1)
+    cv2.ellipse(trial_map,(246,145), (60,30), 0, 0, 360, 255, -1)
+    cv2.rectangle(trial_map,(50,0),(100,299),255,-1)
+    trial_map = trial_map[:][::-1]
     # print(trial_map[50][160])
     # cv2.imshow('map', trial_map)
     # cv2.waitKey(0)
     return trial_map
 
 trial_map = get_trial()
-print(trial_map)
+# print(trial_map)
 
 def get_pos():
-    start_col = int(input("Starting Column: "))
-    start_row = int(input("Starting Row: "))
+    start_col = int(input("Starting y: "))
+    start_row = int(input("Starting x: "))
     starting_position = [start_col,start_row]
     
-    goal_col = int(input("Goal Column: "))
-    goal_row = int(input("Goal Row: "))
+    goal_col = int(input("Goal y: "))
+    goal_row = int(input("Goal x: "))
     goal_position = [goal_col,goal_row]
 
     # print(f'start: {starting_position}')
@@ -57,8 +76,7 @@ def Action_Move(start_col, start_row, parent_pos, direction):
     if next_pos[1] < x and next_pos[1] >= 0 and next_pos[0] < y and next_pos[0] >= 0 and trial_map[next_pos[0], next_pos[1]] != obstacle and next_pos not in visited:
 
         trial_map[next_pos[0], next_pos[1]] = 150
-        cv2.imshow('bfs map', trial_map)
-        cv2.waitKey(0)
+        
 
         visited.append(next_pos)
         parent_visited.append(parent_pos)
@@ -72,14 +90,17 @@ def Action_Move(start_col, start_row, parent_pos, direction):
 
 
 my_list = []
-    
+fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+out = cv2.VideoWriter('bfs.avi',fourcc, 20.0, (x,y))  
 try:
         goal_reached = False
-        i =0
+        i = 0
+        
+        
         while not goal_reached:
 
-            print(f'I is:{i}')
-            print(list(parent_q.queue))
+            # print(f'I is:{i}')
+            # print(list(parent_q.queue))
             parent_pos = parent_q.get_nowait()
             my_list.append(parent_pos)
 
@@ -101,13 +122,26 @@ try:
 
             if parent_q.empty():
                 print("No Solution")
+                exit()
 
                 break
             i += 1
+
+            if i % 50 == 0:
+                map = cv2.cvtColor(trial_map, cv2.COLOR_GRAY2BGR)
+                out.write(map)
+                cv2.imshow('bfs map', trial_map)
+                cv2.waitKey(1)
+            
+            if quit == ord('q'):  # You can quit when you pre the q key
+                break 
+
 except KeyboardInterrupt:
     exit()
 
-my_path = []
+
+
+optimized = []
 j = 0
 current_pos = tuple(goal)
 # print(f'Visited is: {visited}')
@@ -117,10 +151,17 @@ while current_pos != 0:
     winning_index = visited.index(current_pos)
     # print(f'win:{winning_index}')
     # print(parent_visited[winning_index])
-    my_path.append(current_pos)
+    optimized.append(current_pos)
     current_pos = parent_visited[winning_index]
 
     j += 1
 
-my_path.reverse()
-print(f'optimized: {my_path}')
+optimized.reverse()
+print(f'optimized: {optimized}')
+
+for coords in optimized:
+    trial_map[coords[0],coords[1]] = 0
+    map2 = cv2.cvtColor(trial_map, cv2.COLOR_GRAY2BGR)
+    out.write(map2)
+
+out.release()
