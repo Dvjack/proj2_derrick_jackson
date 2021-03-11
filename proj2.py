@@ -20,6 +20,8 @@ y = 300
 #     # cv2.waitKey(0)
 #     return trial_map
 
+# Function to generate the the final map for testing
+# Creates the obstacles and stores the map in a matrix represented as either 255(white) or 0(black)
 def get_trial():
     trial_map = np.zeros([y,x],np.uint8)
     # trial_map[y-1-60:y-40-1,90:110] = 255
@@ -42,6 +44,7 @@ def get_trial():
 trial_map = get_trial()
 # print(trial_map)
 
+# Function to ask the user where they would like to start and end on the map 
 def get_pos():
     start_col = int(input("Starting y: "))
     start_row = int(input("Starting x: "))
@@ -61,12 +64,13 @@ goal = pos[1]
 print(f'start: {start}')
 print(f'goal: {goal}')
 
+# Initializing the queue, visited, and parent queue/visited used for bfs
 parent_visited = [0]
 visited = [start]
 parent_q = q.Queue()
 parent_q.put_nowait(start)
 
-
+# Function to move to the next position if its within the map, not an obstacle, and hasn't been visited
 def Action_Move(start_col, start_row, parent_pos, direction):
 
     next_pos = (start_col + direction[0], start_row + direction[1])
@@ -77,11 +81,12 @@ def Action_Move(start_col, start_row, parent_pos, direction):
 
         trial_map[next_pos[0], next_pos[1]] = 150
         
-
+        # Adds to the visited, and the parent queue once its been to the new position
         visited.append(next_pos)
         parent_visited.append(parent_pos)
         parent_q.put_nowait(next_pos)
 
+        # If we're at the goal then say we made it
         if next_pos[0] == goal[0] and next_pos[1] == goal[1]:
             print("Goal has been reached")
             print(f'End is: {next_pos}')
@@ -92,6 +97,8 @@ def Action_Move(start_col, start_row, parent_pos, direction):
 my_list = []
 fourcc = cv2.VideoWriter_fourcc(*'DIVX')
 out = cv2.VideoWriter('bfs.avi',fourcc, 20.0, (x,y))  
+
+# loop the bfs search until the goal has been reached or you cannot find a goal
 try:
         goal_reached = False
         i = 0
@@ -120,6 +127,7 @@ try:
 
             goal_reached = Action_Move(parent_pos[0],parent_pos[1], parent_pos, (1,1)) or goal_reached
 
+            # When theres no more parent nodes to go to then the solution doesn't exist
             if parent_q.empty():
                 print("No Solution")
                 exit()
@@ -127,6 +135,8 @@ try:
                 break
             i += 1
 
+            # Show the map as it goes through the bfs search. The gray is what's searching
+            # Also save the video of the bfs search
             if i % 50 == 0:
                 map = cv2.cvtColor(trial_map, cv2.COLOR_GRAY2BGR)
                 out.write(map)
@@ -140,7 +150,7 @@ except KeyboardInterrupt:
     exit()
 
 
-
+# Get the optimized path after going through the entire bfs based on the parent visited
 optimized = []
 j = 0
 current_pos = tuple(goal)
@@ -159,6 +169,7 @@ while current_pos != 0:
 optimized.reverse()
 print(f'optimized: {optimized}')
 
+# write the optimized path in black to the video
 for coords in optimized:
     trial_map[coords[0],coords[1]] = 0
     map2 = cv2.cvtColor(trial_map, cv2.COLOR_GRAY2BGR)
